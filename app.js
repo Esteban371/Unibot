@@ -7,26 +7,31 @@ async function sendMessage() {
   addMessage(text, "user");
   input.value = "";
 
-  const res = await fetch("/api/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      messages: [
-        { role: "user", content: text }
-      ]
-    })
-  });
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        messages: [
+          { role: "user", content: text }
+        ]
+      })
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  // 👇 SOLUCIÓN CLAVE
-  if (data.reply) {
-    addMessage(data.reply, "bot");
-  } else if (data.error) {
-    addMessage("❌ Error: " + JSON.stringify(data.error), "bot");
-  } else {
-    addMessage("⚠️ Sin respuesta del servidor", "bot");
+    console.log("RESPUESTA BACKEND:", data); // 👈 DEBUG
+
+    if (data.reply) {
+      addMessage(data.reply, "bot");
+    } else {
+      addMessage(data, "bot"); // 👈 aquí mostramos TODO
+    }
+
+  } catch (error) {
+    addMessage("❌ Error de conexión", "bot");
+    console.error(error);
   }
 }
