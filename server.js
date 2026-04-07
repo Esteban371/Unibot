@@ -1,33 +1,21 @@
 const express = require('express');
 const path = require('path');
+const fetch = require('node-fetch');
 
 const app = express();
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const SYSTEM_PROMPT = `Eres UniBot, el asistente virtual oficial de la Corporación Universitaria Comfacauca (Unicomfacauca), ubicada en Popayán, Cauca, Colombia.
+const SYSTEM_PROMPT = Eres UniBot, asistente de Unicomfacauca. Responde claro, profesional y en español.;
 
-Tu rol es orientar a estudiantes, aspirantes y comunidad académica sobre:
-- Programas académicos: Ingeniería en Sistemas, Contaduría Pública, Administración de Empresas, Licenciaturas, Tecnologías y demás programas.
-- Procesos de admisión, matrícula y renovación de matrícula.
-- Reglamento estudiantil: derechos, deberes, sanciones, calificaciones.
-- Servicios institucionales: bienestar universitario, biblioteca, sistemas, oficina de graduados.
-- Información general: misión, visión, acreditaciones, sedes.
-- Calendario académico y fechas importantes.
-
-Comportamiento:
-- Siempre responde en español, tono amable y profesional.
-- Usa viñetas cuando sea útil.
-- Si no tienes información específica, orienta a contactar la institución o visitar www.comfacauca.com.
-- Si preguntan algo fuera del contexto universitario, redirige amablemente.
-- Termina siempre invitando a seguir preguntando.`;
+// Ruta test
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, 'public/index.html'));
+});
 
 app.post('/api/chat', async (req, res) => {
   const { messages } = req.body;
-
-  if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: 'Mensajes inválidos.' });
-  }
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -38,31 +26,30 @@ app.post('/api/chat', async (req, res) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1000,
+        model: 'claude-3-haiku-20240307',
+        max_tokens: 500,
         system: SYSTEM_PROMPT,
-        messages: messages
+        messages
       })
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Error API:', data);
-      return res.status(response.status).json({ error: data?.error?.message || 'Error de API' });
+      return res.status(500).json({ error: "Error en IA" });
     }
 
-    const reply = data.content?.[0]?.text || 'No pude generar una respuesta.';
+    const reply = data.content?.[0]?.text || "Sin respuesta.";
     res.json({ reply });
 
-  } catch (err) {
-    console.error('Error servidor:', err);
-    res.status(500).json({ error: 'Error interno del servidor.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error servidor" });
   }
 });
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("Servidor corriendo en puerto " + PORT);
+  console.log("🚀 UniBot activo en puerto " + PORT);
 });
