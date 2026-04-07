@@ -3,99 +3,127 @@
 <head>
   <meta charset="UTF-8">
   <title>UniBot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1b2b;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      text-align: center;
+      padding: 10px;
+      background: #081422;
+      font-weight: bold;
+    }
+
+    #chat {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+    }
+
+    .msg {
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 10px;
+      max-width: 80%;
+    }
+
+    .user {
+      background: #2d6cdf;
+      align-self: flex-end;
+    }
+
+    .bot {
+      background: #1e293b;
+      align-self: flex-start;
+    }
+
+    footer {
+      display: flex;
+      padding: 10px;
+      background: #081422;
+    }
+
+    input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+    }
+
+    button {
+      margin-left: 10px;
+      padding: 10px;
+      background: green;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+  </style>
 </head>
+<body>
 
-<body style="background:#0f172a; color:white; font-family:Arial; margin:0; padding:0;">
+<header>🤖 UniBot</header>
 
-  <h2 style="text-align:center; padding:10px;">🤖 UniBot</h2>
+<div id="chat"></div>
 
-  <!-- CHAT -->
-  <div id="chat" style="
-    height:70vh;
-    overflow:auto;
-    padding:10px;
-    border-top:1px solid #333;
-    border-bottom:1px solid #333;
-  "></div>
+<footer>
+  <input id="input" placeholder="Escribe tu pregunta..." />
+  <button onclick="send()">Enviar</button>
+</footer>
 
-  <!-- INPUT -->
-  <div style="display:flex; padding:10px; gap:5px;">
-    <input id="input" placeholder="Escribe tu pregunta..."
-      style="flex:1; padding:10px; border-radius:5px; border:none;" />
-    
-    <button onclick="sendMessage()"
-      style="padding:10px; background:#22c55e; border:none; color:white; border-radius:5px;">
-      Enviar
-    </button>
-  </div>
+<script>
+async function send() {
+  const input = document.getElementById("input");
+  const chat = document.getElementById("chat");
 
-  <!-- SCRIPT -->
-  <script>
-    const chat = document.getElementById("chat");
+  const text = input.value.trim();
+  if (!text) return;
 
-    function addMessage(text, sender) {
-      const div = document.createElement("div");
+  // Mensaje usuario
+  const userMsg = document.createElement("div");
+  userMsg.className = "msg user";
+  userMsg.textContent = text;
+  chat.appendChild(userMsg);
 
-      div.style.margin = "10px";
-      div.style.padding = "10px";
-      div.style.borderRadius = "10px";
-      div.style.maxWidth = "80%";
+  input.value = "";
 
-      if (sender === "user") {
-        div.style.background = "#2563eb";
-        div.style.marginLeft = "auto";
-      } else {
-        div.style.background = "#16a34a";
-        div.style.marginRight = "auto";
-      }
+  // Mensaje bot (cargando)
+  const botMsg = document.createElement("div");
+  botMsg.className = "msg bot";
+  botMsg.textContent = "Escribiendo...";
+  chat.appendChild(botMsg);
 
-      div.innerText = text;
+  chat.scrollTop = chat.scrollHeight;
 
-      chat.appendChild(div);
-      chat.scrollTop = chat.scrollHeight;
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        messages: [
+          { role: "user", content: text }
+        ]
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.reply) {
+      botMsg.textContent = data.reply;
+    } else {
+      botMsg.textContent = "Error: " + JSON.stringify(data);
     }
 
-    async function sendMessage() {
-      const input = document.getElementById("input");
-      const text = input.value;
-
-      if (!text) return;
-
-      addMessage(text, "user");
-      input.value = "";
-
-      try {
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            messages: [
-              {
-                role: "user",
-                content: text
-              }
-            ]
-          })
-        });
-
-        const data = await res.json();
-
-        console.log("Respuesta IA:", data);
-
-        if (data.reply) {
-          addMessage(data.reply, "bot");
-        } else {
-          addMessage("❌ Error: " + JSON.stringify(data), "bot");
-        }
-
-      } catch (error) {
-        console.error(error);
-        addMessage("❌ Error de conexión", "bot");
-      }
-    }
-  </script>
-
-</body>
-</html>
+  } catch (err) {
+    botMsg.textContent = "Error conectando con el servidor";
