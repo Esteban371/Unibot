@@ -6,6 +6,10 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
 const SYSTEM_PROMPT = 'Eres UniBot, asistente de Unicomfacauca. Responde claro, profesional y en español.';
 
 // Ruta test
