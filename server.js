@@ -6,53 +6,42 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API CHAT
+// Ruta principal
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// API CHAT (SIN IA DE PAGO - RESPUESTAS INTELIGENTES LOCALES)
 app.post('/api/chat', async (req, res) => {
   const { messages } = req.body;
 
   if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: 'Mensajes inválidos' });
+    return res.status(400).json({ error: 'Mensajes inválidos.' });
   }
 
-  try {
-    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'llama-3.3-70b-versatile',
-        messages: messages,
-        temperature: 0.7
-      })
-    });
+  const userMessage = messages[messages.length - 1].content.toLowerCase();
 
-    const data = await response.json();
+  let reply = "No tengo esa información aún. Intenta preguntar sobre matrícula, horarios o pagos.";
 
-    if (!response.ok) {
-      console.error("ERROR IA:", data);
-      return res.status(500).json({
-        error: data?.error?.message || "Error en IA"
-      });
-    }
-
-   const reply = data.choices?.[0]?.message?.content || "Sin respuesta";
-
-  } catch (error) {
-    console.error("ERROR SERVIDOR:", error);
-    res.status(500).json({ error: "Error interno del servidor" });
+  // 🔥 RESPUESTAS INTELIGENTES (puedes ampliar esto)
+  if (userMessage.includes("hola")) {
+    reply = "¡Hola! 👋 Soy UniBot. ¿En qué puedo ayudarte?";
+  } 
+  else if (userMessage.includes("matricula")) {
+    reply = "📚 La matrícula se realiza en línea desde el portal estudiantil. Debes estar al día con tus pagos.";
+  } 
+  else if (userMessage.includes("horario")) {
+    reply = "🕒 Puedes consultar tus horarios en el sistema académico ingresando con tu usuario.";
+  } 
+  else if (userMessage.includes("pago")) {
+    reply = "💰 Los pagos se pueden realizar por PSE, banco o en la universidad.";
   }
-});
 
-// FRONTEND
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.json({ reply });
 });
-console.log("API KEY:", process.env.GROQ_API_KEY);
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("🚀 UniBot activo en puerto " + PORT);
+  console.log("🚀 UniBot funcionando en puerto " + PORT);
 });
