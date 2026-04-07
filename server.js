@@ -15,17 +15,16 @@ app.post('/api/chat', async (req, res) => {
   }
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'claude-3-haiku-20240307',
-        max_tokens: 500,
-        messages: messages
+        model: 'llama3-8b-8192',
+        messages: messages,
+        temperature: 0.7
       })
     });
 
@@ -38,7 +37,7 @@ app.post('/api/chat', async (req, res) => {
       });
     }
 
-    const reply = data.content?.[0]?.text || "Sin respuesta";
+    const reply = data.choices?.[0]?.message?.content || "Sin respuesta";
     res.json({ reply });
 
   } catch (error) {
