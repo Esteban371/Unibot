@@ -6,17 +6,9 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
 const SYSTEM_PROMPT = 'Eres UniBot, asistente de Unicomfacauca. Responde claro, profesional y en español.';
 
-// Ruta test
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, 'public/index.html'));
-});
-
+// API primero
 app.post('/api/chat', async (req, res) => {
   const { messages } = req.body;
 
@@ -53,6 +45,10 @@ app.post('/api/chat', async (req, res) => {
     console.error("ERROR SERVIDOR:", error);
     res.status(500).json({ error: "Error interno del servidor" });
   }
+});
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 const PORT = process.env.PORT || 3000;
