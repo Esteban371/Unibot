@@ -39,8 +39,8 @@ app.post('/api/chat', async (req, res) => {
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(500).json({ error: "Error en IA" });
-    }
+      console.error(data);
+return res.status(500).json({ error: data });
 
     const reply = data.content?.[0]?.text || "Sin respuesta.";
     res.json({ reply });
