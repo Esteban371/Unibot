@@ -1,0 +1,12 @@
+{
+  "name": "unibot",
+  "version": "1.0.0",
+  "description": "Chatbot de orientación universitaria - Unicomfacauca",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
