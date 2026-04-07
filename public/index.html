@@ -18,8 +18,9 @@
 
     header {
       text-align: center;
-      padding: 10px;
+      padding: 12px;
       background: #081422;
+      font-size: 18px;
       font-weight: bold;
     }
 
@@ -27,6 +28,8 @@
       flex: 1;
       padding: 10px;
       overflow-y: auto;
+      display: flex;
+      flex-direction: column;
     }
 
     .msg {
@@ -66,6 +69,7 @@
       color: white;
       border: none;
       border-radius: 5px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -77,18 +81,24 @@
 
 <footer>
   <input id="input" placeholder="Escribe tu pregunta..." />
-  <button onclick="send()">Enviar</button>
+  <button id="btn">Enviar</button>
 </footer>
 
 <script>
-async function send() {
-  const input = document.getElementById("input");
-  const chat = document.getElementById("chat");
+const input = document.getElementById("input");
+const chat = document.getElementById("chat");
+const button = document.getElementById("btn");
 
+button.addEventListener("click", send);
+input.addEventListener("keypress", function(e) {
+  if (e.key === "Enter") send();
+});
+
+async function send() {
   const text = input.value.trim();
   if (!text) return;
 
-  // Mensaje usuario
+  // Usuario
   const userMsg = document.createElement("div");
   userMsg.className = "msg user";
   userMsg.textContent = text;
@@ -96,7 +106,7 @@ async function send() {
 
   input.value = "";
 
-  // Mensaje bot (cargando)
+  // Bot (cargando)
   const botMsg = document.createElement("div");
   botMsg.className = "msg bot";
   botMsg.textContent = "Escribiendo...";
@@ -111,19 +121,20 @@ async function send() {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        messages: [
-          { role: "user", content: text }
-        ]
+        messages: [{ role: "user", content: text }]
       })
     });
 
     const data = await res.json();
+    botMsg.textContent = data.reply || "Sin respuesta";
 
-    if (data.reply) {
-      botMsg.textContent = data.reply;
-    } else {
-      botMsg.textContent = "Error: " + JSON.stringify(data);
-    }
-
-  } catch (err) {
+  } catch (error) {
     botMsg.textContent = "Error conectando con el servidor";
+  }
+
+  chat.scrollTop = chat.scrollHeight;
+}
+</script>
+
+</body>
+</html>
