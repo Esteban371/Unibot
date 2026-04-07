@@ -1,3 +1,20 @@
+function addMessage(text, sender) {
+  const chat = document.getElementById("chat");
+
+  const div = document.createElement("div");
+  div.className = sender;
+
+  // 🔥 evita [object Object]
+  if (typeof text === "string") {
+    div.innerText = text;
+  } else {
+    div.innerText = JSON.stringify(text, null, 2);
+  }
+
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
 async function sendMessage() {
   const input = document.getElementById("input");
   const text = input.value;
@@ -22,16 +39,13 @@ async function sendMessage() {
 
     const data = await res.json();
 
-    console.log("RESPUESTA BACKEND:", data); // 👈 DEBUG
-
     if (data.reply) {
       addMessage(data.reply, "bot");
     } else {
-      addMessage(data, "bot"); // 👈 aquí mostramos TODO
+      addMessage("❌ " + data.error, "bot");
     }
 
   } catch (error) {
     addMessage("❌ Error de conexión", "bot");
-    console.error(error);
   }
 }
