@@ -1,15 +1,22 @@
+const chat = document.getElementById("chat");
+
 function addMessage(text, sender) {
-  const chat = document.getElementById("chat");
-
   const div = document.createElement("div");
-  div.className = sender;
 
-  // 🔥 evita [object Object]
-  if (typeof text === "string") {
-    div.innerText = text;
+  div.style.margin = "10px";
+  div.style.padding = "10px";
+  div.style.borderRadius = "10px";
+  div.style.maxWidth = "80%";
+
+  if (sender === "user") {
+    div.style.background = "#2563eb";
+    div.style.marginLeft = "auto";
   } else {
-    div.innerText = JSON.stringify(text, null, 2);
+    div.style.background = "#16a34a";
+    div.style.marginRight = "auto";
   }
+
+  div.innerText = text;
 
   chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
@@ -32,20 +39,26 @@ async function sendMessage() {
       },
       body: JSON.stringify({
         messages: [
-          { role: "user", content: text }
+          {
+            role: "user",
+            content: text
+          }
         ]
       })
     });
 
     const data = await res.json();
 
+    console.log("Respuesta IA:", data); // 👈 CLAVE PARA DEBUG
+
     if (data.reply) {
       addMessage(data.reply, "bot");
     } else {
-      addMessage("❌ " + data.error, "bot");
+      addMessage("❌ Error: " + JSON.stringify(data), "bot");
     }
 
   } catch (error) {
+    console.error(error);
     addMessage("❌ Error de conexión", "bot");
   }
 }
