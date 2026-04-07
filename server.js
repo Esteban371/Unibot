@@ -37,8 +37,7 @@ app.post('/api/chat', async (req, res) => {
       });
     }
 
-    const reply = data.choices?.[0]?.message?.content || "Sin respuesta";
-    res.json({ reply });
+   const reply = data.choices?.[0]?.message?.content || "Sin respuesta";
 
   } catch (error) {
     console.error("ERROR SERVIDOR:", error);
