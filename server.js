@@ -11,37 +11,81 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// API CHAT (SIN IA DE PAGO - RESPUESTAS INTELIGENTES LOCALES)
+// 🔥 RESPUESTAS LOCALES INTELIGENTES
+function responderLocal(mensaje) {
+  mensaje = mensaje.toLowerCase();
+
+  if (mensaje.includes("hola") || mensaje.includes("buenas")) {
+    return "¡Hola! 👋 Soy UniBot. ¿En qué puedo ayudarte hoy?";
+  }
+
+  if (mensaje.includes("matricula") || mensaje.includes("inscripción")) {
+    return "📚 Matrícula:\n1. Entra al portal\n2. Selecciona materias\n3. Genera recibo\n4. Paga\n\n¿Quieres ayuda con esto?";
+  }
+
+  if (mensaje.includes("horario")) {
+    return "🕒 Puedes ver tus horarios en el sistema académico con tu usuario.";
+  }
+
+  if (mensaje.includes("pago") || mensaje.includes("costos")) {
+    return "💰 Métodos de pago:\n- PSE\n- Banco\n- Caja universidad\n\n¿Quieres fechas?";
+  }
+
+  if (mensaje.includes("carreras")) {
+    return "🎓 Carreras:\n- Sistemas\n- Administración\n- Contaduría\n- Derecho\n\n¿Quieres detalles?";
+  }
+
+  return null; // 👈 importante
+}
+
+// 🔥 API CHAT
 app.post('/api/chat', async (req, res) => {
   const { messages } = req.body;
+  const userMessage = messages[messages.length - 1].content;
 
-  if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: 'Mensajes inválidos.' });
+  // 1️⃣ intentar respuesta local
+  const local = responderLocal(userMessage);
+  if (local) {
+    return res.json({ reply: local });
   }
 
-  const userMessage = messages[messages.length - 1].content.toLowerCase();
+  // 2️⃣ fallback IA GRATIS (Groq)
+  try {
+    const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.GROQ_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "llama3-8b-8192",
+        messages: [
+          {
+            role: "system",
+            content: "Eres UniBot, asistente universitario en Colombia. Responde claro, útil y en español."
+          },
+          ...messages
+        ]
+      })
+    });
 
-  let reply = "No tengo esa información aún. Intenta preguntar sobre matrícula, horarios o pagos.";
+    const data = await response.json();
 
-  // 🔥 RESPUESTAS INTELIGENTES (puedes ampliar esto)
-  if (userMessage.includes("hola")) {
-    reply = "¡Hola! 👋 Soy UniBot. ¿En qué puedo ayudarte?";
-  } 
-  else if (userMessage.includes("matricula")) {
-    reply = "📚 La matrícula se realiza en línea desde el portal estudiantil. Debes estar al día con tus pagos.";
-  } 
-  else if (userMessage.includes("horario")) {
-    reply = "🕒 Puedes consultar tus horarios en el sistema académico ingresando con tu usuario.";
-  } 
-  else if (userMessage.includes("pago")) {
-    reply = "💰 Los pagos se pueden realizar por PSE, banco o en la universidad.";
+    const reply = data?.choices?.[0]?.message?.content || "No pude responder eso 😅";
+
+    res.json({ reply });
+
+  } catch (error) {
+    console.error(error);
+
+    res.json({
+      reply: "⚠️ No tengo esa info exacta ahora, pero puedo ayudarte con matrícula, horarios, pagos o carreras 😉"
+    });
   }
-
-  res.json({ reply });
 });
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-  console.log("🚀 UniBot funcionando en puerto " + PORT);
+  console.log("🚀 UniBot NIVEL DIOS en puerto " + PORT);
 });
