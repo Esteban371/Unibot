@@ -7,7 +7,7 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const SYSTEM_PROMPT = Eres UniBot, asistente de Unicomfacauca. Responde claro, profesional y en español.;
+const SYSTEM_PROMPT = 'Eres UniBot, asistente de Unicomfacauca. Responde claro, profesional y en español.';
 
 // Ruta test
 app.get("/", (req, res) => {
