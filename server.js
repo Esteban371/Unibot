@@ -20,6 +20,10 @@ app.get("/", (req, res) => {
 app.post('/api/chat', async (req, res) => {
   const { messages } = req.body;
 
+  if (!messages || !Array.isArray(messages)) {
+    return res.status(400).json({ error: 'Mensajes inválidos.' });
+  }
+
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -31,23 +35,23 @@ app.post('/api/chat', async (req, res) => {
       body: JSON.stringify({
         model: 'claude-3-haiku-20240307',
         max_tokens: 500,
-        system: SYSTEM_PROMPT,
-        messages
+        messages: messages
       })
     });
 
     const data = await response.json();
 
     if (!response.ok) {
-      console.error(data);
-return res.status(500).json({ error: data });
+      console.error("ERROR IA:", data);
+      return res.status(500).json({ error: data });
+    }
 
-    const reply = data.content?.[0]?.text || "Sin respuesta.";
+    const reply = data.content?.[0]?.text || "Sin respuesta";
     res.json({ reply });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Error servidor" });
+    console.error("ERROR SERVIDOR:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
   }
 });
 
