@@ -49,6 +49,7 @@ app.post('/api/chat', async (req, res) => {
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+console.log("API KEY:", process.env.GROQ_API_KEY);
 
 const PORT = process.env.PORT || 3000;
 
