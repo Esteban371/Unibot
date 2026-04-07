@@ -22,7 +22,7 @@ app.post('/api/chat', async (req, res) => {
         'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'llama-3.1-70b-versatile',
+        model: 'mixtral-8x7b-32768',
         messages: messages,
         temperature: 0.7
       })
