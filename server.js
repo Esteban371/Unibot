@@ -6,14 +6,12 @@ const app = express();
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const SYSTEM_PROMPT = 'Eres UniBot, asistente de Unicomfacauca. Responde claro, profesional y en español.';
-
-// API primero
+// API CHAT
 app.post('/api/chat', async (req, res) => {
   const { messages } = req.body;
 
   if (!messages || !Array.isArray(messages)) {
-    return res.status(400).json({ error: 'Mensajes inválidos.' });
+    return res.status(400).json({ error: 'Mensajes inválidos' });
   }
 
   try {
@@ -35,7 +33,9 @@ app.post('/api/chat', async (req, res) => {
 
     if (!response.ok) {
       console.error("ERROR IA:", data);
-      return res.status(500).json({ error: data });
+      return res.status(500).json({
+        error: data?.error?.message || "Error en IA"
+      });
     }
 
     const reply = data.content?.[0]?.text || "Sin respuesta";
@@ -47,6 +47,7 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
+// FRONTEND
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
