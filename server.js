@@ -58,7 +58,7 @@ app.post('/api/chat', async (req, res) => {
   const userMessage = messages[messages.length - 1].content;
 
   // 1️⃣ intentar respuesta local
-  const local = responderLocal(userMessage);
+  const local = responderLocal(userMessage, messages);
   if (local) {
     return res.json({ reply: local });
   }
