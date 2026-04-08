@@ -1,118 +1,136 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>UniBot</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>UniBot</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0b1b2b;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
 
-    header {
-      text-align: center;
-      padding: 12px;
-      background: #081422;
-      font-size: 18px;
-      font-weight: bold;
-    }
+header {
+  text-align: center;
+  padding: 15px;
+  background: #020617;
+  font-weight: bold;
+}
 
-    #chat {
-      flex: 1;
-      padding: 10px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-    }
+#chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
 
-    .msg {
-      padding: 10px;
-      margin: 5px 0;
-      border-radius: 10px;
-      max-width: 80%;
-    }
+.msg {
+  padding: 10px;
+  margin: 6px 0;
+  border-radius: 10px;
+  max-width: 80%;
+}
 
-    .user {
-      background: #2d6cdf;
-      align-self: flex-end;
-    }
+.user {
+  background: #2563eb;
+  align-self: flex-end;
+}
 
-    .bot {
-      background: #1e293b;
-      align-self: flex-start;
-    }
+.bot {
+  background: #1e293b;
+  align-self: flex-start;
+}
 
-    footer {
-      display: flex;
-      padding: 10px;
-      background: #081422;
-    }
+#quick {
+  display: flex;
+  gap: 5px;
+  padding: 5px;
+  overflow-x: auto;
+}
 
-    input {
-      flex: 1;
-      padding: 10px;
-      border: none;
-      border-radius: 5px;
-    }
+.quick-btn {
+  background: #334155;
+  padding: 6px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 12px;
+}
 
-    button {
-      margin-left: 10px;
-      padding: 10px;
-      background: green;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-  </style>
+footer {
+  display: flex;
+  padding: 10px;
+  background: #020617;
+}
+
+input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+}
+
+button {
+  margin-left: 5px;
+  padding: 10px;
+  background: green;
+  border: none;
+  color: white;
+  border-radius: 5px;
+}
+</style>
 </head>
+
 <body>
 
 <header>🤖 UniBot</header>
 
+<div id="quick">
+  <div class="quick-btn" onclick="quick('matricula')">Matrícula</div>
+  <div class="quick-btn" onclick="quick('horarios')">Horarios</div>
+  <div class="quick-btn" onclick="quick('pagos')">Pagos</div>
+  <div class="quick-btn" onclick="quick('carreras')">Carreras</div>
+</div>
+
 <div id="chat"></div>
 
 <footer>
-  <input id="input" placeholder="Escribe tu pregunta..." />
-  <button id="btn">Enviar</button>
+  <input id="input" placeholder="Escribe aquí..." />
+  <button onclick="send()">Enviar</button>
 </footer>
 
 <script>
-const input = document.getElementById("input");
 const chat = document.getElementById("chat");
-const button = document.getElementById("btn");
+const input = document.getElementById("input");
 
-button.addEventListener("click", send);
-input.addEventListener("keypress", function(e) {
-  if (e.key === "Enter") send();
-});
+function addMsg(text, type) {
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function quick(text) {
+  input.value = text;
+  send();
+}
 
 async function send() {
   const text = input.value.trim();
   if (!text) return;
 
-  // Usuario
-  const userMsg = document.createElement("div");
-  userMsg.className = "msg user";
-  userMsg.textContent = text;
-  chat.appendChild(userMsg);
-
+  addMsg(text, "user");
   input.value = "";
 
-  // Bot (cargando)
-  const botMsg = document.createElement("div");
-  botMsg.className = "msg bot";
-  botMsg.textContent = "Escribiendo...";
-  chat.appendChild(botMsg);
-
-  chat.scrollTop = chat.scrollHeight;
+  const loading = document.createElement("div");
+  loading.className = "msg bot";
+  loading.textContent = "Escribiendo...";
+  chat.appendChild(loading);
 
   try {
     const res = await fetch("/api/chat", {
@@ -126,13 +144,12 @@ async function send() {
     });
 
     const data = await res.json();
-    botMsg.textContent = data.reply || "Sin respuesta";
 
-  } catch (error) {
-    botMsg.textContent = "Error conectando con el servidor";
+    loading.textContent = data.reply || "Sin respuesta";
+
+  } catch {
+    loading.textContent = "Error del servidor";
   }
-
-  chat.scrollTop = chat.scrollHeight;
 }
 </script>
 
