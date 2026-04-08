@@ -22,7 +22,9 @@ function responderLocal(mensaje) {
   if (mensaje.includes("matricula") || mensaje.includes("inscripción")) {
     return "📚 Matrícula:\n1. Entra al portal\n2. Selecciona materias\n3. Genera recibo\n4. Paga\n\n¿Quieres ayuda con esto?";
   }
-
+if (mensaje.includes("contacto")) {
+  return "📞 Puedes comunicarte con la universidad:\n\n- Teléfono: (602) XXX XXX\n- Email: info@unicomfacauca.edu.co\n- Web: www.unicomfacauca.edu.co";
+}
   if (mensaje.includes("horario")) {
     return "🕒 Puedes ver tus horarios en el sistema académico con tu usuario.";
   }
