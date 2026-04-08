@@ -13,31 +13,43 @@ app.get("/", (req, res) => {
 
 // 🔥 RESPUESTAS LOCALES INTELIGENTES
 function responderLocal(mensaje) {
+function responderLocal(mensaje, historial) {
   mensaje = mensaje.toLowerCase();
 
+  const ultimo = historial[historial.length - 2]?.content?.toLowerCase() || "";
+
+  // SALUDO
   if (mensaje.includes("hola") || mensaje.includes("buenas")) {
-    return "¡Hola! 👋 Soy UniBot. ¿En qué puedo ayudarte hoy?";
+    return "¡Hola! 👋 Soy UniBot de Unicomfacauca. ¿En qué puedo ayudarte?";
   }
 
-  if (mensaje.includes("matricula") || mensaje.includes("inscripción")) {
-    return "📚 Matrícula:\n1. Entra al portal\n2. Selecciona materias\n3. Genera recibo\n4. Paga\n\n¿Quieres ayuda con esto?";
-  }
-if (mensaje.includes("contacto")) {
-  return "📞 Puedes comunicarte con la universidad:\n\n- Teléfono: (602) XXX XXX\n- Email: info@unicomfacauca.edu.co\n- Web: www.unicomfacauca.edu.co";
-}
-  if (mensaje.includes("horario")) {
-    return "🕒 Puedes ver tus horarios en el sistema académico con tu usuario.";
-  }
-
+  // PAGOS
   if (mensaje.includes("pago") || mensaje.includes("costos")) {
-    return "💰 Métodos de pago:\n- PSE\n- Banco\n- Caja universidad\n\n¿Quieres fechas?";
+    return "💰 Métodos de pago:\n- PSE\n- Banco\n- Caja universidad\n\n¿Quieres saber fechas de pago?";
   }
 
-  if (mensaje.includes("carreras")) {
-    return "🎓 Carreras:\n- Sistemas\n- Administración\n- Contaduría\n- Derecho\n\n¿Quieres detalles?";
+  // SI responde después de pagos
+  if ((mensaje === "si" || mensaje === "sí") && ultimo.includes("pago")) {
+    return "📅 Fechas de pago:\n\n- Primer corte: 10 de cada mes\n- Segundo corte: 20 de cada mes\n\nEvita recargos pagando antes de la fecha límite.";
   }
 
-  return null; // 👈 importante
+  // MATRÍCULA
+  if (mensaje.includes("matricula")) {
+    return "📚 Matrícula:\n1. Ingresa al portal\n2. Selecciona materias\n3. Genera recibo\n4. Realiza el pago\n\n¿Necesitas ayuda con algún paso?";
+  }
+
+  // SI después de matrícula
+  if ((mensaje === "si" || mensaje === "sí") && ultimo.includes("matrícula")) {
+    return "👉 Para matricularte necesitas:\n\n- Usuario activo\n- No tener deudas\n- Haber aprobado prerequisitos\n\n¿En qué paso estás?";
+  }
+
+  // CARRERAS
+  if (mensaje.includes("carreras") || mensaje.includes("programas")) {
+    return "🎓 Programas:\n- Ingeniería de Sistemas\n- Administración de Empresas\n- Contaduría Pública\n- Derecho\n\n¿Quieres info de alguna carrera?";
+  }
+
+  return null;
+} // 👈 importante
 }
 
 // 🔥 API CHAT
